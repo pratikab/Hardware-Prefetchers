@@ -6,8 +6,11 @@ SandboxPrefetcher::SandboxPrefetcher(const SandboxPrefetcherParams *p)
     distance(p->distance)
 {
     int i;
-    lastaddr = 0;
     CountMisses = 0;
+    for(i = 0;i < 256 ; i++){
+        sandbox[i] = 0;
+    }
+    CurrIndex = 0;
     for(i = 0;i< 8; i++){
         Candidates[i] = new SandboxCandidate;
         Candidates[i]->offset = i+1;
@@ -25,12 +28,17 @@ SandboxPrefetcher::calculatePrefetch(const PacketPtr &pkt,
     Addr blkAddr = pkt->getAddr() & ~(Addr)(blkSize-1);
     if (CountMisses == 256) reset(); // Reset function
     int index = CountMisses/16; // Current Active Prefetcher
-    int currAddr = lastaddr + blkSize*(Candidates[index]->offset);
+    int currAddr = blkaddr + blkSize*(Candidates[index]->offset);
+    sandbox[CurrIndex] = currAddr;
     CountMisses++;
-    if (currAddr == blkAddr){ // not actually, we need to get response from bloom filter
-        (Candidates[index]->accuracy)++;
+    CurrIndex++;
+    int i ;
+    for(i = 0;i<CurrIndex;i++){
+        if (sandbox[i] == blkAddr){
+            (Candidates[index]->accuracy)++;
+            break;
+        }
     }
-    lastaddr = blkAddr;
 }
 
 SandboxPrefetcher*

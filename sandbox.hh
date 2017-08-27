@@ -12,7 +12,6 @@ class SandboxPrefetcher : public QueuedPrefetcher
   protected:
     uint32_t degree;                  	    // Determines the number of prefetch reuquests to be issued at a time
     uint32_t distance;                      // Determines the prefetch distance
-   	Addr lastAddr;							// Last demand address
    	uint32_t CountMisses;					// Counter of number of misses
     class SandboxCandidate {
       public:
@@ -20,6 +19,8 @@ class SandboxPrefetcher : public QueuedPrefetcher
         int accuracy;
     };
     SandboxCandidate * Candidates[16];
+    Addr sandbox[256];
+    uint32_t CurrIndex;
   public:
     SandboxPrefetcher(const SandboxPrefetcherParams *p);
 
