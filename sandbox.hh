@@ -13,6 +13,8 @@ class SandboxPrefetcher : public QueuedPrefetcher
     uint32_t degree;                  	    // Determines the number of prefetch reuquests to be issued at a time
     uint32_t distance;                      // Determines the prefetch distance
    	uint32_t CountMisses;					// Counter of number of misses
+    bool valid;
+    uint32_t realcand; // offset for real candidate
     class SandboxCandidate {
       public:
         int offset; // Offset for immediate prefetching

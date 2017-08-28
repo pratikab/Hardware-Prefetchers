@@ -19,6 +19,8 @@ SandboxPrefetcher::SandboxPrefetcher(const SandboxPrefetcherParams *p)
         Candidates[i+8]->offset = (-1)*(i+1);
         Candidates[i+8]->accuracy = 0;
     }
+    valid = false;
+    realcand = 0;
 }
 
 void
@@ -26,9 +28,25 @@ SandboxPrefetcher::calculatePrefetch(const PacketPtr &pkt,
         std::vector<Addr> &addresses)
 {
     Addr blkAddr = pkt->getAddr() & ~(Addr)(blkSize-1);
-    if (CountMisses == 256) reset(); // Reset function
+    if (CountMisses == 256)  // Reset function
+    {
+        CountMisses = 0;
+        CurrIndex = 0;
+        int i;
+        for(i = 0;i < 256 ; i++){
+            sandbox[i] = 0;
+        }
+        uint8_t max_acc = -1;
+        for (i = 0;i<16;i++){
+            if((Candidates[i]->accuracy) > max_acc){
+                valid = true;
+                realcand = Candidates[i]->offset;
+            }
+        }
+        
+    }
     int index = CountMisses/16; // Current Active Prefetcher
-    int currAddr = blkaddr + blkSize*(Candidates[index]->offset);
+    int currAddr = blkAddr + blkSize*(Candidates[index]->offset);
     sandbox[CurrIndex] = currAddr;
     CountMisses++;
     CurrIndex++;
@@ -37,6 +55,13 @@ SandboxPrefetcher::calculatePrefetch(const PacketPtr &pkt,
         if (sandbox[i] == blkAddr){
             (Candidates[index]->accuracy)++;
             break;
+        }
+    }
+    if (valid){  // Real Prefetching
+        for (uint8_t d = 1; d <= degree; d++) {
+            Addr pf_addr = blkAddr + blkSize * (d + realcand);
+            addresses.push_back(pf_addr);
+            DPRINTF(HWPrefetch, "Queuing prefetch to %#x.\n", pf_addr);
         }
     }
 }
