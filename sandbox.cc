@@ -41,7 +41,9 @@ SandboxPrefetcher::calculatePrefetch(const PacketPtr &pkt,
             if((Candidates[i]->accuracy) > max_acc){
                 valid = true;
                 realcand = Candidates[i]->offset;
+                max_acc = (Candidates[i]->accuracy);
             }
+            (Candidates[i]->accuracy) = 0;
         }
         
     }
