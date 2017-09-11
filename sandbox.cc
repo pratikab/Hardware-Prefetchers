@@ -36,7 +36,7 @@ SandboxPrefetcher::calculatePrefetch(const PacketPtr &pkt,
         for(i = 0;i < 256 ; i++){
             sandbox[i] = 0;
         }
-        uint8_t max_acc = -1;
+        int max_acc = -1;
         for (i = 0;i<16;i++){
             if((Candidates[i]->accuracy) > max_acc){
                 valid = true;
