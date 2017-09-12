@@ -1,5 +1,3 @@
-
-
 #ifndef __MEM_CACHE_PREFETCH_SPP_HH__
 #define __MEM_CACHE_PREFETCH_SPP_HH__
 
@@ -10,10 +8,15 @@
 class SPPPrefetcher : public QueuedPrefetcher
 {
   protected:
+    struct Sig
+    {
+        unsigned val: 12; // 12 bits
+    };
+    const Addr pageBytes;
     class SignatureTableEntry {
       public:
         int last_offset; // Offset for immediate prefetching
-        unsigned signature: 12;
+        Sig signature;
     };
     class PatternTableEntry {
       public:
@@ -23,7 +26,7 @@ class SPPPrefetcher : public QueuedPrefetcher
     };
     class GlobalHistoryTableEntry{
       public:
-        unsigned signature: 12;
+        Sig signature;
         float pathProb;
         int last_offset;
         int Delta;
@@ -37,7 +40,7 @@ class SPPPrefetcher : public QueuedPrefetcher
     SPPPrefetcher(const SPPPrefetcherParams *p);
 
     ~SPPPrefetcher() {}
-
+    bool samePage(Addr a, Addr b) const;
     void calculatePrefetch(const PacketPtr &pkt, std::vector<Addr> &addresses);
 };
 
