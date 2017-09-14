@@ -36,7 +36,7 @@ class SPPPrefetcher : public QueuedPrefetcher
     float prefetch_control;
     float thresold;
   public:
-    long int pageBytes;
+    Addr pageBytes;
     SPPPrefetcher(const SPPPrefetcherParams *p);
 
     ~SPPPrefetcher() {}

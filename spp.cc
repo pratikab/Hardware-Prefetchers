@@ -10,25 +10,27 @@ SPPPrefetcher::SPPPrefetcher(const SPPPrefetcherParams *p)
 {
     thresold = 0.2;
     prefetch_control = 0.9;
-    pageBytes = 4096;
-    int i;
+    pageBytes = 1048576;
+    // int i;
 
 /*Initialise Signature Table*/
-    for (i = 0;i< 256;i++){
+    for (int i = 0;i< 256;i++){
+        ST[i] = new SignatureTableEntry;
         ST[i]->last_offset = 0;
         ST[i]->signature.val = 0;
     }
 /*Initialise Pattern Table*/
-    for (i = 0;i<4096;i++){
-        int j;
-        for(j = 0;j<4 ;j++){
+    for (int i = 0;i<4096;i++){
+        PT[i] = new PatternTableEntry;
+        for(int j = 0;j<4 ;j++){
             PT[i]->Delta[j] = 0;
             PT[i]->cDelta[j] = 0;
             PT[i]->Csig = 0;
         }
     }
 /*Initialise global history table*/
-    for (i = 0;i< 256;i++){
+    for (int i = 0;i< 256;i++){
+        GHR[i] = new GlobalHistoryTableEntry;
         GHR[i]->last_offset = 0;
         GHR[i]->signature.val = 0;
         GHR[i]->pathProb = 0;
@@ -40,18 +42,21 @@ void
 SPPPrefetcher::calculatePrefetch(const PacketPtr &pkt,
         std::vector<Addr> &addresses)
 {
-    // int  p;
-    // scanf("%d",&p);
+    // inform("1");
     Addr blkAddr = pkt->getAddr() & ~(Addr)(blkSize-1);
     int totalblk = pageBytes/blkSize;
-    int pageno = roundDown(blkAddr, pageBytes); // To get physical page number of current access.
+    int pageno = (roundDown(blkAddr, pageBytes))%256; // To get physical page number of current access.
     // int pageno = blkAddr/pageSize;  // To get physical page number of current access.
     int offset = (blkAddr%pageBytes)/blkSize;  // To get current offset from start of page for current address.
+    // inform("2++");
     int del = offset - ST[pageno]->last_offset;    
     Sig sig; 
+    // inform("2--");
     sig.val= ST[pageno]->signature.val;
     float pd = 0;
 /*Check Global History Table, New page getting allocated*/   
+    // inform("2");
+
     if (sig.val == 0){
         for (int i = 0; i < 256; ++i)
         {
@@ -67,7 +72,8 @@ SPPPrefetcher::calculatePrefetch(const PacketPtr &pkt,
         pd = 1.0;
     }
     //Prefetching
-   
+       // inform("3");
+
     Sig tempsig;
     tempsig.val = sig.val;
     Addr currAddr = blkAddr;
@@ -118,6 +124,7 @@ SPPPrefetcher::calculatePrefetch(const PacketPtr &pkt,
             pd = 0;
         }
     }
+    // inform("4");
 
 // Update Signature Table and Pattern Table
     ST[pageno]-> last_offset = offset;
@@ -132,7 +139,9 @@ SPPPrefetcher::calculatePrefetch(const PacketPtr &pkt,
             flag = true;
             break;
         }
+        index++;
     }
+        // inform("5");
 
 // Delta found to be incremented
     if(flag == true){
@@ -147,6 +156,7 @@ SPPPrefetcher::calculatePrefetch(const PacketPtr &pkt,
                 flag = true;
                 break;
             }
+            index++;
         }
         if (flag){
             PT[sig.val]->Delta[index] = del;
