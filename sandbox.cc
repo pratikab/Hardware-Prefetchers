@@ -1,4 +1,5 @@
 #include "mem/cache/prefetch/sandbox.hh"
+#include "debug/HWPrefetch.hh"
 
 SandboxPrefetcher::SandboxPrefetcher(const SandboxPrefetcherParams *p)
     : QueuedPrefetcher(p), 
@@ -62,14 +63,16 @@ SandboxPrefetcher::calculatePrefetch(const PacketPtr &pkt,
     if (valid){  // Real Prefetching
         for (uint8_t d = 1; d <= degree; d++) {
             Addr pf_addr = blkAddr + blkSize * (d + realcand);
-            addresses.push_back(pf_addr);
-            DPRINTF(HWPrefetch, "Queuing prefetch to %#x.\n", pf_addr);
+            if (samePage(pf_addr, blkAddr)) {
+                    addresses.push_back(pf_addr);
+                    DPRINTF(HWPrefetch, "Queuing prefetch to %#x.\n", pf_addr);
+            }
+            
         }
     }
 }
 
-SandboxPrefetcher*
-SandboxPrefetcherParams::create()
+SandboxPrefetcher* SandboxPrefetcherParams::create()
 {
    return new SandboxPrefetcher(this);
 }

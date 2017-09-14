@@ -57,7 +57,7 @@ BasePrefetcher::BasePrefetcher(const BasePrefetcherParams *p)
       onMiss(p->on_miss), onRead(p->on_read),
       onWrite(p->on_write), onData(p->on_data), onInst(p->on_inst),
       masterId(system->getMasterId(name())),
-      pageBytes(system->getPageBytes()
+      pageBytes(system->getPageBytes())
 {
 }
 

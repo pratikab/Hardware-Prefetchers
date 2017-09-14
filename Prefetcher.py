@@ -100,3 +100,14 @@ class TaggedPrefetcher(QueuedPrefetcher):
     cxx_header = "mem/cache/prefetch/tagged.hh"
 
     degree = Param.Int(2, "Number of prefetches to generate")
+class SandboxPrefetcher(QueuedPrefetcher):
+    type = 'SandboxPrefetcher'
+    cxx_class = 'SandboxPrefetcher'
+    cxx_header = "mem/cache/prefetch/sandbox.hh"
+    degree = Param.Int(4, "Number of prefetches to generate")
+    distance = Param.Int(32, "disatance in terms of number of cache blocks")
+class SPPPrefetcher(QueuedPrefetcher):
+    type = 'SPPPrefetcher'
+    cxx_class = 'SPPPrefetcher'
+    cxx_header = "mem/cache/prefetch/spp.hh"
+    # sys = Param.System(Parent.any, "System this prefetcher belongs to")    

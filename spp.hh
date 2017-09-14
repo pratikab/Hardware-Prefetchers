@@ -2,7 +2,7 @@
 #define __MEM_CACHE_PREFETCH_SPP_HH__
 
 #include "mem/cache/prefetch/queued.hh"
-#include "params/SPP.hh"
+#include "params/SPPPrefetcher.hh"
 
 
 class SPPPrefetcher : public QueuedPrefetcher
@@ -12,7 +12,6 @@ class SPPPrefetcher : public QueuedPrefetcher
     {
         unsigned val: 12; // 12 bits
     };
-    const Addr pageBytes;
     class SignatureTableEntry {
       public:
         int last_offset; // Offset for immediate prefetching
@@ -37,6 +36,7 @@ class SPPPrefetcher : public QueuedPrefetcher
     float prefetch_control;
     float thresold;
   public:
+    long int pageBytes;
     SPPPrefetcher(const SPPPrefetcherParams *p);
 
     ~SPPPrefetcher() {}

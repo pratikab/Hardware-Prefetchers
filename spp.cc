@@ -1,13 +1,16 @@
-#include "mem/cache/prefetch/SPP.hh"
+#include "mem/cache/prefetch/spp.hh"
 #include <list>
 #include "sim/system.hh"
+#include "debug/HWPrefetch.hh"
+#include <stdio.h>
 
 SPPPrefetcher::SPPPrefetcher(const SPPPrefetcherParams *p)
-    : QueuedPrefetcher(p),
-    pageBytes(system->getPageBytes())
+    : QueuedPrefetcher(p)/*,
+    pageBytes(system->getPageBytes())*/
 {
     thresold = 0.2;
     prefetch_control = 0.9;
+    pageBytes = 4096;
     int i;
 
 /*Initialise Signature Table*/
@@ -37,17 +40,17 @@ void
 SPPPrefetcher::calculatePrefetch(const PacketPtr &pkt,
         std::vector<Addr> &addresses)
 {
+    // int  p;
+    // scanf("%d",&p);
     Addr blkAddr = pkt->getAddr() & ~(Addr)(blkSize-1);
     int totalblk = pageBytes/blkSize;
-    int pageno = roundDown(blkAddr, pageBytes) // To get physical page number of current access.
+    int pageno = roundDown(blkAddr, pageBytes); // To get physical page number of current access.
     // int pageno = blkAddr/pageSize;  // To get physical page number of current access.
     int offset = (blkAddr%pageBytes)/blkSize;  // To get current offset from start of page for current address.
-
-    
     int del = offset - ST[pageno]->last_offset;    
     Sig sig; 
     sig.val= ST[pageno]->signature.val;
-     float pd ;
+    float pd = 0;
 /*Check Global History Table, New page getting allocated*/   
     if (sig.val == 0){
         for (int i = 0; i < 256; ++i)
@@ -90,12 +93,12 @@ SPPPrefetcher::calculatePrefetch(const PacketPtr &pkt,
                 if (samePage(pf_addr, currAddr)) {
                     addresses.push_back(pf_addr);
                     DPRINTF(HWPrefetch, "Queuing prefetch to %#x.\n", pf_addr);
-                    tempsig.val = (tempsig.val << 3) ^ delta;
+                    tempsig.val = (tempsig.val << 3) ^ off;
                     currAddr = pf_addr;
                 }
                 else{
                     int currBlk = (currAddr%pageBytes)/blkSize;
-                    flaot tpd = 1.0;
+                    float tpd = 1.0;
                     int select = -1;
                     for (int i = 0;i<256;i++){
                         if (GHR[i]->pathProb < tpd){
@@ -118,7 +121,7 @@ SPPPrefetcher::calculatePrefetch(const PacketPtr &pkt,
 
 // Update Signature Table and Pattern Table
     ST[pageno]-> last_offset = offset;
-    (ST[pageno]->signature).val = ((ST[pageno]->signature).val << 3) ^ delta;
+    (ST[pageno]->signature).val = ((ST[pageno]->signature).val << 3) ^ del;
     PT[sig.val]->Csig++; //Have to implement saturating counters.
     bool flag = false;
     int index = 0;
