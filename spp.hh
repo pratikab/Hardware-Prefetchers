@@ -32,11 +32,11 @@ class SPPPrefetcher : public QueuedPrefetcher
     };
     SignatureTableEntry * ST[256];
     GlobalHistoryTableEntry * GHR[256];
-    PatternTableEntry * PT[4096];
-    float prefetch_control;
-    float thresold;
+    PatternTableEntry * PT[4096];   
   public:
     Addr pageBytes;
+    float thresold;
+    float prefetch_control;
     SPPPrefetcher(const SPPPrefetcherParams *p);
 
     ~SPPPrefetcher() {}

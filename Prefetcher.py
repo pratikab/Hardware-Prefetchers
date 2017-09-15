@@ -110,4 +110,5 @@ class SPPPrefetcher(QueuedPrefetcher):
     type = 'SPPPrefetcher'
     cxx_class = 'SPPPrefetcher'
     cxx_header = "mem/cache/prefetch/spp.hh"
-    # sys = Param.System(Parent.any, "System this prefetcher belongs to")    
+    thresold = Param.Float(32, "Threshold")
+    prefetch_control = Param.Float(32, "Alpha")
